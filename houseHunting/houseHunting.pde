@@ -72,6 +72,10 @@ void draw(){
   if(shot){
     background(255);
   }
+
+  for(Target t : targets){
+    t.update();
+  }
   textFont(comic);
   textSize(70);
   textMode(CORNER);
@@ -83,9 +87,6 @@ void draw(){
   text("you break you buy",60, 450);
   textSize(60);
   text("mortgage: $"+debt, 70, height-30);
-  for(Target t : targets){
-    t.update();
-  }
 
 }
 
