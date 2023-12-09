@@ -19,7 +19,10 @@ boolean shot;
 int lastHandState; //0 closed, 1 open
 
 void setup(){
-  size(720, 480, P3D);
+  //size(1920, 1080, P3D);
+  fullScreen(P3D,2);
+  println("width: "+width);
+  println("height: "+height);
   kinect = new KinectPV2(this);
 
   kinect.enableSkeletonColorMap(true);
@@ -70,9 +73,16 @@ void draw(){
     background(255);
   }
   textFont(comic);
-  textSize(20);
+  textSize(70);
   textMode(CORNER);
-  text("monthly debt: $"+debt, 10, height-30);
+  text("House Hunter", width/3-20, 100);
+  textSize(30);
+  text("tm", width/2+200, 100);
+  textSize(30);
+  text("throw rocks", 60, 400);
+  text("you break you buy",60, 450);
+  textSize(60);
+  text("mortgage: $"+debt, 70, height-30);
   for(Target t : targets){
     t.update();
   }
@@ -98,9 +108,11 @@ class Target{
   int deathTimer;
   int index;
   boolean indebted;
+  float spin;
   
   Target(int type, int ind){ //1 is house anything else is other
     index = ind;
+    spin = 0;
     if (type == 1){
       house = false;
     }else{
@@ -122,25 +134,36 @@ class Target{
     if(y > height || y < 0){
       ySpeed = ySpeed * -1;
     }
-    pushMatrix();
-    translate(x, y);
-    if(house && !shot){
+    if(house){
+      pushMatrix();
+      translate(x, y, z);
+      rotateY(spin);
       imageMode(CENTER);
-      image(houses[pic], 0, 0, 100, 100);
+      image(houses[pic], 0, 0, 200, 200);
       textMode(CENTER);
       //text(int(x)+", ", 0, 100);
       //text(int(y), 50, 100);
+      popMatrix();
       
     }
-    if(!house && !shot){
+    if(!house){
+      pushMatrix();
+      translate(x,y,z);
+      rotateY(spin);
       imageMode(CENTER);
-      image(others[pic], 0, 0, 100, 100);
+      image(others[pic], 0, 0, 200, 200);
+      popMatrix();
     }
     if(shot && deathTimer > 0){
       deathTimer--;
-      textSize(15);
+      spin = map(deathTimer, 200, 0, 100, 0);
+      pushMatrix();
+      translate(x,y, 0);
+      textSize(60);
       textMode(CENTER);
       text(deathString, 0, 0);
+      popMatrix();
+      z-=50;
       if(!indebted){
         debt = debt + payment;
         indebted = true;
@@ -149,14 +172,13 @@ class Target{
     if(shot && deathTimer <=0){
       spawn();
     }
-    popMatrix();
     
   }
   void spawn(){
    if(house){
       pic = int(random(houses.length));
       payment = int(random(10000)+500);
-      deathString = "you won a monthly payment of "+ "$"+(payment);
+      deathString = "$"+(payment);
       indebted = false;
     }else{
       pic = int(random(others.length));
@@ -164,6 +186,7 @@ class Target{
     }
     x = random(width);
     y = random(height);
+    z = 0;
     xSpeed = random(-2, 2);
     ySpeed = random(-2, 2);
     visible = true;
@@ -178,7 +201,7 @@ void mouseClicked(){
   for(Target t : targets){
     if (mouseX > t.leftEdge && mouseX < t.rightEdge && mouseY < t.bottomEdge && mouseY > t.topEdge){
       t.shot = true;
-      println("hit at x:"+mouseX+"and y:"+mouseY);
+      //println("hit at x:"+mouseX+"and y:"+mouseY);
       
     }
   }
@@ -252,16 +275,16 @@ void drawHandState(KJoint joint) {
   noStroke();
   if(handState(joint.getState())){
     println("shot fired");
-    println("miss at x:"+joint.getX()/3+"and y:"+joint.getY()/3);
+    //println("miss at x:"+joint.getX()+"and y:"+joint.getY());
     for(Target t : targets){
-      if (joint.getX()/3 > t.leftEdge && joint.getX()/3 < t.rightEdge && joint.getY()/3 < t.bottomEdge && joint.getY()/3 > t.topEdge){
+      if (joint.getX()*0.53> t.leftEdge && joint.getX()*0.53 < t.rightEdge && joint.getY()*0.71 < t.bottomEdge && joint.getY()*0.71 > t.topEdge){
         t.shot = true;
-        println("hit at x:"+joint.getX()/3+"and y:"+joint.getY()/3);    
+        //println("hit at x:"+joint.getX()+"and y:"+joint.getY());    
       }
     }
   }
   pushMatrix();
-  translate(joint.getX()/3, joint.getY()/3, joint.getZ());
+  translate(joint.getX()*0.53, joint.getY()*0.71, 0);
   //ellipse(0, 0, 70, 70);
   imageMode(CENTER);
   image(scope, 0, 0, 50, 50);
